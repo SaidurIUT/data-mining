@@ -361,102 +361,154 @@ class TimingBreakdown:
 
 ## 3. Results & Analysis
 
-### 3.1 Evaluation Metrics
+### 3.1 Evaluation Methodology
 
-#### 3.1.1 Overall System Performance
+We tested 8 queries across 3 categories:
+- **Cross-lingual (4 queries):** English queries → Bangla corpus (e.g., "election", "prime minister")
+- **Same-language (3 queries):** Bangla queries → Bangla corpus (e.g., "বিএনপি", "নির্বাচন কমিশন")
+- **Code-switched (1 query):** Mixed language (e.g., "BNP party")
 
-| Metric | Value | Target | Status |
-|--------|-------|--------|--------|
-| **Precision@10** | 0.90 | ≥0.60 | ✅ PASS |
-| **Recall@50** | 0.87 | ≥0.50 | ✅ PASS |
-| **nDCG@10** | 0.93 | ≥0.50 | ✅ PASS |
-| **MRR** | 1.00 | ≥0.40 | ✅ PASS |
+This mix properly tests CLIR capabilities rather than just same-language retrieval.
 
-#### 3.1.2 Per-Query Breakdown
+### 3.2 Overall System Performance
 
-| Query | P@10 | R@50 | nDCG@10 | MRR |
-|-------|------|------|---------|-----|
-| নির্বাচন (election) | 1.00 | 0.94 | 1.00 | 1.00 |
-| বিএনপি (BNP) | 0.90 | 0.95 | 0.94 | 1.00 |
-| ঢাকা (Dhaka) | 0.80 | 0.71 | 0.84 | 1.00 |
-
----
-
-### 3.2 Model Comparison
-
-#### 3.2.1 Retrieval Method Performance
-
-| Method | Avg P@10 | Avg Time (ms) | Best For |
-|--------|----------|---------------|----------|
-| BM25 | 0.75 | 11 | Same-language exact match |
-| Fuzzy | 0.45 | 48 | Typo tolerance |
-| Semantic | 0.82 | 8,600 | Cross-lingual queries |
-| **Hybrid** | **0.90** | 250 | General use |
-
-#### 3.2.2 Performance Visualization
-
-```
-Precision@10 by Method
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-BM25      ████████████████████████████░░░░░░░░  0.75
-Fuzzy     ██████████████████░░░░░░░░░░░░░░░░░░  0.45
-Semantic  █████████████████████████████████░░░  0.82
-Hybrid    ████████████████████████████████████  0.90
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Query Execution Time (ms)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-BM25      █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  11ms
-Fuzzy     ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  48ms
-Semantic  ████████████████████████████████████  8,600ms
-Hybrid    ████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  250ms
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+| Metric | BM25 | Semantic | Hybrid | Target |
+|--------|------|----------|--------|--------|
+| **Precision@10** | 0.375 | 0.80 | **0.825** | ≥0.60 ✅ |
+| **Recall@30** | 0.280 | 0.82 | **0.883** | ≥0.50 ✅ |
+| **nDCG@10** | 0.375 | 0.80 | **0.849** | ≥0.50 ✅ |
+| **MRR** | 0.375 | 0.92 | **1.00** | ≥0.40 ✅ |
+| **Avg Time (ms)** | **0.5** | 48.5 | 76.0 | - |
 
 ---
 
-### 3.3 When BM25 Outperforms Semantic (and Vice Versa)
+### 3.3 Performance by Query Type
 
-#### 3.3.1 BM25 Wins When:
+This is the most important analysis - it shows each method's strengths:
+
+#### 3.3.1 Cross-Lingual Queries (English → Bangla)
+
+| Method | P@10 | R@30 | nDCG@10 |
+|--------|------|------|---------|
+| BM25 | 0.00 | 0.00 | 0.00 |
+| Semantic | **0.75** | **1.00** | **0.78** |
+| Hybrid | 0.75 | 1.00 | 0.78 |
+
+**Why BM25 = 0?** BM25 looks for exact keywords. "election" doesn't appear in Bangla text - only "নির্বাচন" does. BM25 cannot bridge this gap.
+
+**Why Semantic wins?** LaBSE embeddings understand that "election" and "নির্বাচন" have the same meaning, enabling cross-lingual retrieval.
+
+#### 3.3.2 Same-Language Queries (Bangla → Bangla)
+
+| Method | P@10 | R@30 | nDCG@10 |
+|--------|------|------|---------|
+| BM25 | **1.00** | 0.75 | **1.00** |
+| Semantic | 0.80 | 0.53 | 0.77 |
+| Hybrid | 0.87 | 0.69 | 0.89 |
+
+**Why BM25 wins?** For same-language queries, exact keyword matching is highly effective. Query "বিএনপি" directly matches "বিএনপি" in documents.
+
+**Why Semantic is lower?** Semantic search finds conceptually related documents that may not contain the exact term, leading to some false positives.
+
+#### 3.3.3 Code-Switched Queries (Mixed Languages)
+
+| Method | P@10 | R@30 | nDCG@10 |
+|--------|------|------|---------|
+| BM25 | 0.00 | 0.00 | 0.00 |
+| Semantic | **1.00** | **1.00** | **1.00** |
+| Hybrid | 1.00 | 1.00 | 1.00 |
+
+Query "BNP party" → Finds documents about "বিএনপি দল"
+
+---
+
+### 3.4 Per-Query Detailed Results
+
+| Query | Type | BM25 P@10 | Semantic P@10 | Hybrid P@10 |
+|-------|------|-----------|---------------|-------------|
+| "election" | cross-lingual | 0.00 | 1.00 | 1.00 |
+| "Bangladesh politics" | cross-lingual | 0.00 | 0.80 | 0.80 |
+| "prime minister" | cross-lingual | 0.00 | 0.70 | 0.70 |
+| "Dhaka city" | cross-lingual | 0.00 | 0.50 | 0.50 |
+| "বিএনপি" | same-language | 1.00 | 0.90 | 1.00 |
+| "নির্বাচন কমিশন" | same-language | 1.00 | 1.00 | 1.00 |
+| "ঢাকা বিশ্ববিদ্যালয়" | same-language | 1.00 | 0.50 | 0.60 |
+| "BNP party" | code-switched | 0.00 | 1.00 | 1.00 |
+
+---
+
+### 3.5 Performance Visualization
+
+```
+Precision@10 by Query Type
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CROSS-LINGUAL (English → Bangla):
+BM25      ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  0.00
+Semantic  ███████████████████████████████░░░░░░░░  0.75
+Hybrid    ███████████████████████████████░░░░░░░░  0.75
+
+SAME-LANGUAGE (Bangla → Bangla):
+BM25      ████████████████████████████████████████  1.00
+Semantic  █████████████████████████████████░░░░░░  0.80
+Hybrid    ███████████████████████████████████░░░░  0.87
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Average Query Time (ms)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BM25      █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  0.5ms
+Semantic  █████████████████████████░░░░░░░░░░░░░░░  48ms
+Hybrid    ████████████████████████████████████████  76ms
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+---
+
+### 3.6 When Each Method Wins
+
+#### 3.6.1 BM25 Wins When:
 
 | Scenario | Example | Why BM25 Wins |
 |----------|---------|---------------|
 | Exact entity match | Query: "বিএনপি" | Direct keyword match in Bangla text |
-| Same-language query | Query: "নির্বাচন ভোট" | All terms present in documents |
-| Specific terminology | Query: "ইসি" (EC) | Acronyms need exact match |
+| Same-language query | Query: "নির্বাচন কমিশন" | All terms present in documents |
+| Specific terminology | Query: "ঢাকা বিশ্ববিদ্যালয়" | Exact multi-word match |
 
-**Example:**
+**Real Example from our evaluation:**
 ```
-Query: "বিএনপি" (BNP)
-BM25 Score:  1.00 → Found exact matches
-Semantic:    0.35 → Understands concept but less precise
+Query: "বিএনপি" (BNP - same language)
+BM25:     P@10=1.00  → Perfect exact keyword matching
+Semantic: P@10=0.90  → Good but includes some false positives
 ```
 
-#### 3.3.2 Semantic Wins When:
+#### 3.6.2 Semantic Wins When:
 
 | Scenario | Example | Why Semantic Wins |
 |----------|---------|-------------------|
 | Cross-lingual | Query: "election" → Finds "নির্বাচন" | Understands meaning across languages |
-| Conceptual match | Query: "voting" → Finds "ভোট" | Semantic similarity |
-| NER mismatch | Query: "Dhaka" → Finds "ঢাকা" | Same entity, different script |
+| English query | Query: "Bangladesh politics" | No Bangla keywords to match |
+| Code-switched | Query: "BNP party" → Finds "বিএনপি দল" | Maps English acronym to Bangla |
 
-**Example:**
+**Real Example from our evaluation:**
 ```
-Query: "Dhaka" (English)
-BM25 Score:  0.00 → No English text in Bangla corpus
-Semantic:    0.30 → Maps to "ঢাকা" documents
+Query: "election" (English → Bangla corpus)
+BM25:     P@10=0.00  → Cannot find English words in Bangla text
+Semantic: P@10=1.00  → Understands cross-lingual meaning
 ```
 
 ---
 
-### 3.4 Error Analysis Summary
+---
+
+### 3.7 Error Analysis Summary
 
 | Error Type | Occurrences | System Handles? | Notes |
 |------------|-------------|-----------------|-------|
-| Translation Failure | 3/5 tested | ✅ Yes | Semantic model compensates |
-| NER Mismatch | 5/5 tested | ✅ Yes | 100% overlap in semantic |
-| Cross-Script Ambiguity | 2/4 variants | ⚠️ Partial | 2 common docs across all |
-| Code-Switching | 2/5 overlap | ✅ Yes | Score 0.74 for mixed query |
+| Translation Failure | 4/4 cross-lingual | ✅ Yes | Semantic handles all English→Bangla |
+| NER Mismatch | 4/4 tested | ✅ Yes | "Dhaka"→"ঢাকা" works via embeddings |
+| Cross-Script Ambiguity | 3/4 tested | ✅ Yes | Semantic bridges script differences |
+| Code-Switching | 1/1 tested | ✅ Yes | "BNP party"→"বিএনপি" perfect match |
+| Same-language exact match | 3/3 tested | ✅ Yes | BM25 excels here |
 
 ---
 

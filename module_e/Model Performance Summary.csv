@@ -1,0 +1,4 @@
+method,precision_at_10,recall_at_30,ndcg_at_10,mrr,avg_time_ms
+bm25,0.375,0.2804,0.375,0.375,0.5
+semantic,0.8,0.8225,0.8039,0.9167,48.46
+hybrid,0.825,0.883,0.8489,1.0,76.04

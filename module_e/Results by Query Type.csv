@@ -1,0 +1,10 @@
+query_type,method,avg_precision_at_10,avg_recall_at_30,avg_ndcg_at_10,num_queries
+cross-lingual,bm25,0.0,0.0,0.0,4
+cross-lingual,semantic,0.75,1.0,0.7836,4
+cross-lingual,hybrid,0.75,1.0,0.7836,4
+same-language,bm25,1.0,0.7476,1.0,3
+same-language,semantic,0.8,0.5268,0.7656,3
+same-language,hybrid,0.8667,0.6881,0.8857,3
+code-switched,bm25,0.0,0.0,0.0,1
+code-switched,semantic,1.0,1.0,1.0,1
+code-switched,hybrid,1.0,1.0,1.0,1
