@@ -1,0 +1,6 @@
+error_category,test_case,query,expected_behavior,actual_behavior,success,key_finding
+Translation Failure,চেয়ার vs chair vs Chairman,চেয়ার,"Should find 'chair' related docs, not 'Chairman'",Semantic finds 3/5 overlap with correct translation vs 2/5 with mistranslation,Yes,Semantic model handles translation ambiguity
+NER Mismatch,ঢাকা vs Dhaka,ঢাকা / Dhaka,Both scripts should find same Dhaka-related docs,BM25: 0/5 overlap; Semantic: 5/5 overlap,Yes,Semantic bridges cross-lingual NER gap perfectly
+Semantic vs Lexical,শিক্ষা (education),শিক্ষা,Should find related concept স্কুল (school),BM25: 5 results (exact); Semantic: 10 results (conceptual),Yes,Semantic finds more conceptually related docs
+Cross-Script Ambiguity,Bangladesh variants,Bangladesh / বাংলাদেশ / Bangla Desh / বাঙলাদেশ,All variants should retrieve similar docs,2/5 common docs across all 4 variants,Partial,System handles but not perfectly
+Code-Switching,Mixed Bangla-English,Bangladesh এর election,Should handle mixed language query,Score 0.74; 2/5 overlap with pure Bangla; 2/5 with pure English,Yes,System handles code-switching reasonably well

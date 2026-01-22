@@ -1,0 +1,7 @@
+entry_id,prompt,tool,date,output_type,verification_method,verification_result,correction_needed,correction_details,included_in_report,section
+1,"Write Python code to compute nDCG@K for a list of relevance scores",Claude,Jan 2026,Code,"Tested against manual calculation with k=10",Correct,No,,Yes,evaluation.py lines 120-150
+2,"Implement BM25 search algorithm with inverted index for Bangla text",GitHub Copilot,Jan 2026,Code,"Compared against rank-bm25 library",Matched within 0.01,Yes,Changed k1 from 1.2 to 1.5 for better Bangla performance,Yes,module_c/bm25.py
+3,"What are common error categories in CLIR systems?",Claude,Jan 2026,Text,"Cross-checked with Nie (2010) survey paper",Mostly correct,Yes,"Added 'code-switching' category which AI initially missed",Yes,Section 3.4
+4,"How to properly create relevance judgments for IR evaluation without circular bias?",Claude,Jan 2026,Methodology,"Confirmed against TREC evaluation guidelines",Correct,No,,Yes,create_relevance_judgments.py
+5,"Explain the BM25 formula parameters k1 and b",Claude,Jan 2026,Text,"Verified against Robertson (1994) original paper",Correct,No,,Yes,Section 2.5.1
+6,"How does LaBSE achieve language-agnostic embeddings?",Claude,Jan 2026,Text,"Cross-referenced with Feng et al. (2020) paper",Correct,No,,Yes,Literature Review 1.4
