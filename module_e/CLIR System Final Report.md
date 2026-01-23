@@ -43,7 +43,7 @@ These results confirm the theoretical expectation that semantic embeddings are e
 
 ### 2.1 Overview
 
-We reviewed five foundational and recent papers in Cross-Lingual Information Retrieval to understand the theoretical basis and state-of-the-art techniques relevant to our system.
+We reviewed three key papers in Cross-Lingual Information Retrieval to understand the theoretical basis and state-of-the-art techniques relevant to our system.
 
 ---
 
@@ -709,6 +709,8 @@ def is_relevant(doc, query_info):
 | Semantic | 0.800 | 0.823 | 0.804 | 0.917 | 48.5 |
 | **Hybrid** | **0.825** | **0.883** | **0.849** | **1.000** | 76.0 |
 
+*Note: These are averaged across all 8 queries (4 cross-lingual + 3 same-language + 1 code-switched)*
+
 **Target Thresholds (from assignment):**
 - Precision@10 ≥ 0.60 ✅ Hybrid achieves 0.825
 - Recall@50 ≥ 0.50 ✅ Hybrid achieves 0.883
@@ -963,8 +965,8 @@ Semantic:     28 documents about "নির্বাচন" → P@10 = 1.00
 Given our sample size (8 queries), we acknowledge limitations in statistical power. However, the patterns are consistent:
 
 - BM25 = 0.00 for **all 5** cross-lingual/code-switched queries (not by chance)
-- Semantic > 0.50 for **all 8** queries (consistently effective)
-- Hybrid ≥ Semantic for **7/8** queries (fusion helps)
+- Semantic ≥ 0.50 for **all 8** queries (consistently effective)
+- Hybrid ≥ Semantic for **8/8** queries (fusion helps or matches)
 
 ---
 
